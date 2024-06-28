@@ -1,5 +1,9 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
+import Stripe from 'stripe'
+import "dotenv/config"
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 const app = new Hono()
 
