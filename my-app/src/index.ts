@@ -8,9 +8,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 const app = new Hono()
 
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
 app.post('/', c => {
   return c.text('Post Request from Hono!')
 })
@@ -42,6 +39,38 @@ app.get('/success', (c) => {
 
 app.get('/cancel', (c) => {
   return c.text('Payment Cancelled!')
+})
+
+app.get('/', c => {
+  const html = `
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Checkout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+  </head>
+  <body>
+    <h1>Checkout</h1>
+    <button id="checkoutButton">Checkout</button>
+
+    <script>
+      const checkoutButton = document.getElementById('checkoutButton');
+      checkoutButton.addEventListener('click', async () => {
+        const response = await fetch('/checkout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const {id} = await response.json();
+        const stripe = Stripe('${process.env.STRIPE_PUBLISHABLE_KEY}');
+        await stripe.redirectToCheckout({sessionId: id});
+      });
+    </script>
+  </body>
+</html>
+`
+  return c.html(html)
 })
 
 const port = 3000
